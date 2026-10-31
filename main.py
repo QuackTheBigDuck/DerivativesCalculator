@@ -1,24 +1,3 @@
-"""
-Derivative Calculator for Calculus 1 & 2
-========================================
-Requires:  pip install sympy
-
-Covers:
-  1. Any derivative, with numbered step-by-step rules
-     (constant, power, sum, constant multiple, product, quotient, chain,
-      exponential, logarithmic, trig, inverse trig, hyperbolic)
-  2. Higher-order derivatives (f'', f''', ... f^(n))
-  3. Derivative with respect to any variable (partial derivatives)
-  4. Implicit differentiation (dy/dx and d2y/dx2)
-  5. Parametric curves (dy/dx and d2y/dx2)
-  6. Polar curves (dy/dx for r = f(theta))
-  7. Logarithmic differentiation (e.g. x^x, (sin x)^x)
-  8. Value of the derivative at a point + tangent line
-
-Input tips:  use ^ or ** for powers, ln(x) or log(x) for natural log,
-             e^x or exp(x), arcsin(x), sec(x), 3x is fine for 3*x.
-"""
-
 import sympy as sp
 from sympy.parsing.sympy_parser import (
     parse_expr,
@@ -50,19 +29,11 @@ for _name in ("x", "y", "t", "theta", "u", "a", "b", "c", "k", "n", "r"):
     NAMES[_name] = sp.Symbol(_name)
 
 
-# --------------------------------------------------------------------------
-# Parsing
-# --------------------------------------------------------------------------
 def parse(text):
-    """Turn a string like '3x^2 sin(x)' into a SymPy expression."""
     return parse_expr(text.strip(), local_dict=dict(NAMES), transformations=TRANSFORMS)
 
 
-# --------------------------------------------------------------------------
-# Step-by-step engine
-# --------------------------------------------------------------------------
 def _collect_steps(f, v, out):
-    """Recursively walk the expression and record which rule applies."""
     if not f.has(v):
         out.append(f"Constant rule:  d/d{v}[{f}] = 0")
         return
@@ -71,14 +42,12 @@ def _collect_steps(f, v, out):
         out.append(f"Identity rule:  d/d{v}[{v}] = 1")
         return
 
-    # ---- Sum / difference ------------------------------------------------
     if f.is_Add:
         out.append(f"Sum rule:  differentiate each term of  {f}  separately")
         for term in f.args:
             _collect_steps(term, v, out)
         return
 
-    # ---- Products and quotients -------------------------------------------
     if f.is_Mul:
         num, den = sp.fraction(f)
         if den.has(v):
@@ -106,7 +75,6 @@ def _collect_steps(f, v, out):
         _collect_steps(w, v, out)
         return
 
-    # ---- Powers and exponentials -------------------------------------------
     if f.is_Pow:
         base, exp = f.args
         if not exp.has(v):
@@ -138,7 +106,6 @@ def _collect_steps(f, v, out):
             _collect_steps(base, v, out)
         return
 
-    # ---- One-argument functions: sin, ln, arctan, sinh, ... ----------------
     if len(f.args) == 1:
         inner = f.args[0]
         U = sp.Symbol("u")
@@ -157,7 +124,6 @@ def _collect_steps(f, v, out):
 
 
 def show_steps(f, v):
-    """Print numbered, spaced-out steps and the final answer."""
     steps = []
     _collect_steps(f, v, steps)
     print()
@@ -177,9 +143,6 @@ def show_steps(f, v):
     return ans
 
 
-# --------------------------------------------------------------------------
-# Feature functions
-# --------------------------------------------------------------------------
 def basic(expr_text, var="x"):
     v = sp.Symbol(var)
     return show_steps(parse(expr_text), v)
@@ -200,7 +163,6 @@ def higher_order(expr_text, n, var="x"):
 
 
 def implicit(eq_text):
-    """dy/dx for an equation in x and y, e.g.  x^2 + y^2 = 25"""
     if "=" in eq_text:
         lhs, rhs = eq_text.split("=", 1)
         F = parse(lhs) - parse(rhs)
@@ -307,9 +269,6 @@ def at_point(expr_text, a_text, var="x"):
     return slope
 
 
-# --------------------------------------------------------------------------
-# Command-line menu
-# --------------------------------------------------------------------------
 MENU = """
 ==========================================
    DERIVATIVE CALCULATOR  (Calc 1 & 2)
@@ -358,7 +317,7 @@ def main():
                 at_point(f, a)
             else:
                 print("Please pick 1-8 or q.")
-        except Exception as err:  # bad input, division by zero, etc.
+        except Exception as err:
             print(f"\nCouldn't do that one: {err}\n")
 
 
